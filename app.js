@@ -4,10 +4,10 @@ import {RGBELoader} from 'https://threejsfundamentals.org/threejs/resources/thre
 
 class App {
     url = 'https://ar-with-webxr.s3.us-east-2.amazonaws.com/'
+    selectedObject = null;
 
     constructor() {
-        const container = document.createElement('div');
-        document.body.appendChild(container);
+        const container = document.getElementById('canvas-container')
 
         this.loadingBar = new LoadingBar();
         this.loadingBar.visible = false;
@@ -27,6 +27,8 @@ class App {
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.outputEncoding = THREE.sRGBEncoding;
+
+        this.addTouchListeners(this.renderer.domElement);
         container.appendChild(this.renderer.domElement);
         this.setEnvironment();
 
@@ -43,6 +45,34 @@ class App {
 
         window.addEventListener('resize', this.resize.bind(this));
 
+    }
+
+    addTouchListeners(element) {
+        const self = this;
+        element.addEventListener('touchstart', function(e){
+            e.preventDefault();
+            self.touchDown=true;
+            self.touchX = e.touches[0].pageX;
+            self.touchY = e.touches[0].pageY;
+        }, false);
+
+        element.addEventListener('touchend', function(e){
+            e.preventDefault();
+            self.touchDown = false;
+        }, false);
+
+        element.addEventListener('touchmove', function(e){
+            e.preventDefault();
+            if(!self.touchDown){
+                return;
+            }
+
+            self.deltaX = e.touches[0].pageX - self.touchX;
+            self.deltaY = e.touches[0].pageY - self.touchY;
+            self.touchX = e.touches[0].pageX;
+            self.touchY = e.touches[0].pageY;
+            self.rotateObject();
+        }, false);
     }
 
     setupXR() {
@@ -67,7 +97,7 @@ class App {
         this.hitTestSourceRequested = false;
         this.hitTestSource = null;
 
-        function onSelect() {
+        function placeObject() {
             if (self.chair === undefined) return;
 
             if (self.reticle.visible) {
@@ -76,8 +106,9 @@ class App {
             }
         }
 
+        document.getElementById('place-button').addEventListener('click', placeObject);
+
         this.controller = this.renderer.xr.getController(0);
-        this.controller.addEventListener('select', onSelect);
 
         this.scene.add(this.controller);
     }
@@ -106,6 +137,12 @@ class App {
         });
     }
 
+    rotateObject(){
+        if(this.selectedObject && this.selectedObject.visible && this.reticle.visible){
+            this.selectedObject.rotation.y += this.deltaX / 100;
+        }
+    }
+
     immerse(asset) {
         this.initAR();
 
@@ -123,6 +160,7 @@ class App {
 
                 self.scene.add(gltf.scene);
                 self.chair = gltf.scene;
+                self.selectedObject = gltf.scene;
 
                 self.chair.visible = false;
 
@@ -149,8 +187,11 @@ class App {
         let currentSession = null;
         const self = this;
 
-        const sessionInit = {requiredFeatures: ['hit-test']};
-
+        const sessionInit = {
+            requiredFeatures: ['hit-test'],
+            optionalFeatures: ['dom-overlay'],
+            domOverlay: { root: document.getElementById('content')}
+        };
 
         function onSessionStarted(session) {
 
@@ -228,6 +269,7 @@ class App {
             this.reticle.visible = true;
             this.reticle.matrix.fromArray(pose.transform.matrix);
 
+            document.getElementById("place-button").style.display = "block";
         } else {
 
             this.reticle.visible = false;
