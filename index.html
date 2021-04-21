@@ -104,7 +104,7 @@
         </style>
         <div>
             <model-viewer
-                    id="#model-demo"
+                    id="model-demo"
                     src="https://ar-with-webxr.s3.us-east-2.amazonaws.com/assets/3d/chair-variant.glb"
                     poster="images/blue.png" shadow-intensity="1" ar ar-scale="fixed" camera-controls
                     alt="A 3D model carousel">
@@ -112,18 +112,6 @@
                     View in your space
                 </button>
             </model-viewer>
-            <script>
-                (() => {
-                    const modelViewer = document.querySelector('#model-demo');
-                    const models = ["Mango Velvet", "Peacock Velvet"];
-                    let index = 0;
-                    let that = this;
-                    self.setInterval(() => {
-                        that.index = that.index+1;
-                        modelViewer.variantName = models[that.index % 2];
-                    }, 1500.0);
-                })();
-            </script>
         </div>
     </div>
 
@@ -148,16 +136,12 @@
 
                 <div class="color-choose">
                     <div>
-                        <input data-image="red" type="radio" id="red" name="color" value="red" checked>
+                        <input data-image="Mango Velvet" type="radio" id="red" name="color" value="red" checked>
                         <label for="red"><span></span></label>
                     </div>
                     <div>
-                        <input data-image="blue" type="radio" id="blue" name="color" value="blue">
+                        <input data-image="Peacock Velvet" type="radio" id="blue" name="color" value="blue">
                         <label for="blue"><span></span></label>
-                    </div>
-                    <div>
-                        <input data-image="black" type="radio" id="black" name="color" value="black">
-                        <label for="black"><span></span></label>
                     </div>
                 </div>
 
