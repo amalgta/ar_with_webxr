@@ -117,8 +117,10 @@
                     const modelViewer = document.querySelector('#model-demo');
                     const models = ["Mango Velvet", "Peacock Velvet"];
                     let index = 0;
+                    let that = this;
                     self.setInterval(() => {
-                        modelViewer.variantName = models[index++ % 2];
+                        that.index = that.index+1;
+                        modelViewer.variantName = models[that.index % 2];
                     }, 1500.0);
                 })();
             </script>
