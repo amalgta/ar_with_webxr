@@ -1,13 +1,18 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r125/build/three.module.js';
-import {GLTFLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r125/examples/jsm/loaders/GLTFLoader.js';
-import {RGBELoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r125/examples/jsm/loaders/RGBELoader.js';
+import { GLTFLoader } from 'https://threejsfundamentals.org/threejs/resources/threejs/r125/examples/jsm/loaders/GLTFLoader.js';
+import { RGBELoader } from 'https://threejsfundamentals.org/threejs/resources/threejs/r125/examples/jsm/loaders/RGBELoader.js';
 
 class App {
     url = 'https://ar-with-webxr.s3.us-east-2.amazonaws.com/'
+    selectedObject = null;
+    zoomFactor = 0.01;
+    touchEvent = {
+        cache: {},
+        prevDiff: -1,
+    }
 
     constructor() {
-        const container = document.createElement('div');
-        document.body.appendChild(container);
+        const container = document.getElementById('canvas-container')
 
         this.loadingBar = new LoadingBar();
         this.loadingBar.visible = false;
@@ -23,10 +28,12 @@ class App {
         ambient.position.set(0.5, 1, 0.25);
         this.scene.add(ambient);
 
-        this.renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.outputEncoding = THREE.sRGBEncoding;
+
+        this.addTouchListeners(this.renderer.domElement);
         container.appendChild(this.renderer.domElement);
         this.setEnvironment();
 
@@ -43,6 +50,77 @@ class App {
 
         window.addEventListener('resize', this.resize.bind(this));
 
+    }
+
+    addTouchListeners(element) {
+        const self = this;
+        element.addEventListener('touchstart', function (e) {
+            e.preventDefault();
+            self.touchDown = true;
+            for (let i = 0; i < e.touches.length; i++) {
+                const ev = e.touches[i];
+                const event = {
+                    touchX: ev.pageX,
+                    touchY: ev.pageY,
+                    source: ev,
+                }
+                self.touchEvent.cache[ev.identifier] = event;
+            }
+        }, false);
+
+        element.addEventListener('touchend', function (e) {
+            e.preventDefault();
+            self.touchDown = false;
+            self.touchEvent.prevDiff = -1;
+        }, false);
+
+        element.addEventListener('touchmove', function (e) {
+            e.preventDefault();
+            if (!self.touchDown) {
+                return;
+            }
+
+            for (let i = 0; i < e.touches.length; i++) {
+                const ev = e.touches[i];
+                const cachedEv = self.touchEvent.cache[ev.identifier];
+
+                if (cachedEv) {
+                    cachedEv.deltaX = ev.pageX - cachedEv.touchX;
+                    cachedEv.deltaY = ev.pageY - cachedEv.touchY;
+                    cachedEv.touchX = ev.pageX;
+                    cachedEv.touchY = ev.pageY;
+                    cachedEv.source = ev;
+                }
+            }
+
+            if (e.touches.length == 2) {
+                const cache = self.touchEvent.cache;
+                const currDiff = Math.abs(cache[0].source.clientX - cache[1].source.clientX);
+                const prevDiff = self.touchEvent.prevDiff;
+                if (prevDiff > 0) {
+                    if (currDiff > prevDiff) {
+                        // Increase object scale
+                        self.scaleObject(self.zoomFactor);
+                    }
+                    if (currDiff < prevDiff) {
+                        // Decrease object scale
+                        self.scaleObject(self.zoomFactor*-1);
+                    }
+                }
+
+                self.touchEvent.prevDiff = currDiff;
+            } else if (e.touches.length == 1) {
+                self.rotateObject();
+            }
+
+        }, false);
+    }
+
+    scaleObject(factor) {
+        if (this.selectedObject && this.selectedObject.visible) {
+            const scale = this.selectedObject.scale;
+            scale.set(scale.x+factor, scale.y+factor, scale.z+factor)
+        }
     }
 
     setupXR() {
@@ -67,7 +145,7 @@ class App {
         this.hitTestSourceRequested = false;
         this.hitTestSource = null;
 
-        function onSelect() {
+        function placeObject() {
             if (self.chair === undefined) return;
 
             if (self.reticle.visible) {
@@ -76,8 +154,9 @@ class App {
             }
         }
 
+        document.getElementById('place-button').addEventListener('click', placeObject);
+
         this.controller = this.renderer.xr.getController(0);
-        this.controller.addEventListener('select', onSelect);
 
         this.scene.add(this.controller);
     }
@@ -106,6 +185,13 @@ class App {
         });
     }
 
+    rotateObject() {
+        const deltaX = this.touchEvent.cache[0].deltaX;
+        if (this.selectedObject && this.selectedObject.visible && this.reticle.visible) {
+            this.selectedObject.rotation.y += deltaX / 100;
+        }
+    }
+
     immerse(asset) {
         this.initAR();
 
@@ -123,7 +209,8 @@ class App {
 
                 self.scene.add(gltf.scene);
                 self.chair = gltf.scene;
-
+                self.selectedObject = gltf.scene;
+                
                 self.chair.visible = false;
 
                 self.loadingBar.visible = false;
@@ -139,7 +226,7 @@ class App {
             // called when loading has errors
             function (error) {
 
-                console.log('An error happened');
+                console.log('An error occurred', error);
 
             }
         );
@@ -149,8 +236,11 @@ class App {
         let currentSession = null;
         const self = this;
 
-        const sessionInit = {requiredFeatures: ['hit-test']};
-
+        const sessionInit = {
+            requiredFeatures: ['hit-test'],
+            optionalFeatures: ['dom-overlay'],
+            domOverlay: { root: document.getElementById('content') }
+        };
 
         function onSessionStarted(session) {
 
@@ -196,7 +286,7 @@ class App {
 
         session.requestReferenceSpace('viewer').then(function (referenceSpace) {
 
-            session.requestHitTestSource({space: referenceSpace}).then(function (source) {
+            session.requestHitTestSource({ space: referenceSpace }).then(function (source) {
 
                 self.hitTestSource = source;
 
@@ -228,6 +318,7 @@ class App {
             this.reticle.visible = true;
             this.reticle.matrix.fromArray(pose.transform.matrix);
 
+            document.getElementById("place-button").style.display = "block";
         } else {
 
             this.reticle.visible = false;
@@ -301,4 +392,4 @@ class LoadingBar {
     }
 }
 
-export {App};
+export { App };

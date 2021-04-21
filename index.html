@@ -24,6 +24,15 @@
       .box-shadow { box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05); }
 
       .lh-condensed { line-height: 1.25; }
+
+      #place-button{
+        position: absolute;
+        bottom: 20px;
+        left: calc(50% - 50px);
+        width: 100px;
+        height: 35px;
+        display: none;
+      }
     </style>
   </head>
 
@@ -249,6 +258,11 @@
             </div>
           </form>
         </div>
+      </div>
+
+      <div id="content" class="overlay-content">
+        <div id="canvas-container"></div>
+        <button id="place-button" class="btn btn-success btn-sm btn-block">Place</button>
       </div>
 
       <footer class="my-5 pt-5 text-muted text-center text-small">
