@@ -6,7 +6,7 @@ html, body {
     font-family: 'Roboto', sans-serif;
 }
 
-.container {
+.container1 {
     max-width: 1200px;
     margin: 0 auto;
     padding: 15px;
@@ -206,7 +206,7 @@ html, body {
 
 /* Responsive */
 @media (max-width: 940px) {
-    .container {
+    .container1 {
         flex-direction: column;
         margin-top: 60px;
     }

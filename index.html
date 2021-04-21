@@ -13,15 +13,24 @@
 </head>
 
 <body>
-<main class="container">
+<main class="container1">
 
     <!-- Left Column / Headphones Image -->
     <div class="left-column">
-        <!--        <img data-image="black" src="images/black.png" alt="">-->
-        <!--        <img data-image="blue" src="images/blue.png" alt="">-->
-        <!--        <img data-image="red" class="active" src="images/red.png" alt="">-->
+        <style>
+            model-viewer {
+                background-color: transparent;
+                width: 100%;
+                height: 100%;
+                outline: none;
+            }
+            .js-focus-visible {
+                outline: none;
+            }
+        </style>
         <model-viewer src="https://ar-with-webxr.s3.us-east-2.amazonaws.com/assets/3d/chair.glb"
                       poster="images/blue.png" shadow-intensity="1" ar ar-scale="fixed" camera-controls
+                      background-color="#ffffff"
                       alt="A 3D model carousel">
             <button slot="ar-button" id="ar-button">
                 View in your space
