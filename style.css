@@ -26,19 +26,14 @@ html, body {
 
 
 /* Left Column */
-.left-column img {
+.left-column div {
     width: 100%;
+    height: 100%;
     position: absolute;
     left: 0;
     top: 0;
-    opacity: 0;
     transition: all 0.3s ease;
 }
-
-.left-column img.active {
-    opacity: 1;
-}
-
 
 /* Right Column */
 
@@ -216,8 +211,9 @@ html, body {
         width: 100%;
     }
 
-    .left-column img model-viewer {
+    .left-column div {
         width: 300px;
+        height: 300px;
         right: 0;
         top: -65px;
         left: initial;
@@ -225,9 +221,10 @@ html, body {
 }
 
 @media (max-width: 535px) {
-    .left-column img {
+    .left-column div {
         width: 220px;
-        top: -85px;
+        height: 220px;
+        top: -45px;
     }
 }
 

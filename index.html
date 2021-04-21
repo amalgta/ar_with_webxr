@@ -101,58 +101,17 @@
                 animation: circle 4s linear infinite;
             }
 
-            .slider {
-                width: 100%;
-                text-align: center;
-                overflow: hidden;
-                position: absolute;
-                bottom: 16px;
-            }
-
-            .slides {
-                display: flex;
-                overflow-x: auto;
-                scroll-snap-type: x mandatory;
-                scroll-behavior: smooth;
-                -webkit-overflow-scrolling: touch;
-            }
-
-            .slide {
-                scroll-snap-align: start;
-                flex-shrink: 0;
-                width: 100px;
-                height: 100px;
-                background-size: contain;
-                background-repeat: no-repeat;
-                background-position: center;
-                background-color: #fff;
-                margin-right: 10px;
-                border-radius: 10px;
-                border: none;
-                display: flex;
-            }
-
-            .slide.selected {
-                border: 2px solid #4285f4;
-            }
-
-            .slide:focus {
-                outline: none;
-            }
-
-            .slide:focus-visible {
-                outline: 1px solid #4285f4;
-            }
-
         </style>
-        <model-viewer
-                src="https://ar-with-webxr.s3.us-east-2.amazonaws.com/assets/3d/chair.glb"
-                poster="images/blue.png" shadow-intensity="1" ar ar-scale="fixed" camera-controls
-                alt="A 3D model carousel">
-            <button slot="ar-button" id="ar-button">
-                View in your space
-            </button>
-        </model-viewer>
+        <div>
+            <model-viewer
+                    src="https://ar-with-webxr.s3.us-east-2.amazonaws.com/assets/3d/chair.glb"
+                    poster="images/blue.png" shadow-intensity="1" ar ar-scale="fixed" camera-controls
+                    alt="A 3D model carousel">
+                <button slot="ar-button" id="ar-button">
+                    View in your space
+                </button>
+            </model-viewer>
+        </div>
     </div>
 
 
