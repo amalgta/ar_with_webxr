@@ -32,7 +32,7 @@ $(document).ready(function () {
     );
     let model = getParameterByName("model");
     if (!model) {
-        model = "chair-variant";
+        model = "flight";
     }
     //const modelPath = `../assets/glb/${model}.glb`;
     const modelPath = `https://ar-with-webxr.s3.us-east-2.amazonaws.com/assets/3d/${model}.glb`
@@ -56,6 +56,7 @@ $(document).ready(function () {
         // }
     });
     $('.color-choose input').on('click', function () {
+        modelViewer.play()
         modelViewer.variantName = $(this).attr('data-image');
     });
 });
